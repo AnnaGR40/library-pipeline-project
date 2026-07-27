@@ -6,7 +6,7 @@
 ![Open Issues](https://img.shields.io/github/issues/AnnaGR40/library-pipeline-project)
 ![Open PRs](https://img.shields.io/github/issues-pr/AnnaGR40/library-pipeline-project)
 ![Last Commit](https://img.shields.io/github/last-commit/AnnaGR40/library-pipeline-project)
-![CI Pipeline Badge](https://AnnaGR40/library-pipeline-project/actions/workflows/ci.yml/badge.svg)
+![CI Pipeline Badge](https://github.com/AnnaGR40/library-pipeline-project/actions/workflows/ci.yml/badge.svg)
 
 
 ## Project Overview
