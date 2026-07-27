@@ -1,6 +1,8 @@
 # Architecture Decision Record
+
 ADR-001: Pipeline Architecture
-Date: {{ today }}
+
+Date: {{today}}
 
 Status: Accepted
 
