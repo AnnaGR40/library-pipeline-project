@@ -1,10 +1,10 @@
 # Architecture Decision Record
 
-ADR-001: Pipeline Architecture
+## ADR-001: Pipeline Architecture
 
-Date: {{today}}
+**Date:** 27 July 2026
 
-Status: Accepted
+**Status:** Accepted
 
 Context
 We need to process data from four sources (CSV, JSON, text, Excel) for Newham Public Library. The data has quality issues and needs to be cleaned before it can be used for analysis.
