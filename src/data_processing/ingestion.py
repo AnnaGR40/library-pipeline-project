@@ -13,8 +13,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-import pandas as pd
-
 def load_csv(filepath, **kwargs):
     """Load CSV file into DataFrame.
 
