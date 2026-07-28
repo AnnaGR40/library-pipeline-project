@@ -37,8 +37,8 @@ from data_processing.validation import validate_isbn
 # ============================================
 
 # Define our data directories (medallion architecture)
-BRONZE_DIR = Path('data')
-SILVER_DIR = Path('data/silver')
+BRONZE_DIR = Path("data")
+SILVER_DIR = Path("data/silver")
 
 # Create silver directory if it doesn't exist
 SILVER_DIR.mkdir(parents=True, exist_ok=True)
@@ -47,6 +47,7 @@ SILVER_DIR.mkdir(parents=True, exist_ok=True)
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
+
 
 def print_section_header(title):
     """Print a formatted section header."""
@@ -64,7 +65,7 @@ def print_dataframe_info(df, name):
     try:
         dupes = df.duplicated().sum()
     except TypeError:
-        dupes = 'N/A'
+        dupes = "N/A"
     print(f"  - Duplicates: {dupes}")
 
 
@@ -78,6 +79,7 @@ def save_to_silver(df, filename):
 # ============================================
 # PIPELINE STAGES
 # ============================================
+
 
 def process_circulation_data(warnings):
     """
@@ -95,45 +97,56 @@ def process_circulation_data(warnings):
 
     # Step 1: Load raw data
     print("\n[1/6] Loading raw data...")
-    df = load_csv('data/circulation_data.csv')
+    df = load_csv("data/circulation_data.csv")
     print_dataframe_info(df, "Raw data")
 
     # Step 2: Remove duplicates
     print("\n[2/6] Removing duplicates...")
-    input_dupes = df.duplicated(subset=['transaction_id']).sum()
-    df_clean = remove_duplicates(df, subset=['transaction_id'])
+    input_dupes = df.duplicated(subset=["transaction_id"]).sum()
+    df_clean = remove_duplicates(df, subset=["transaction_id"])
     rows_removed = len(df) - len(df_clean)
     print(f"  - Removed {rows_removed:,} duplicate rows")
-    if input_dupes > 0 and df_clean.duplicated(subset=['transaction_id']).sum() == input_dupes:
-        warnings.append(f"Circulation: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
+    if (
+        input_dupes > 0
+        and df_clean.duplicated(subset=["transaction_id"]).sum() == input_dupes
+    ):
+        warnings.append(
+            f"Circulation: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?"
+        )
 
     # Step 3: Handle missing values
     print("\n[3/6] Handling missing values...")
     input_missing = df_clean.isnull().sum().sum()
-    df_clean = handle_missing_values(df_clean, strategy='drop')
+    df_clean = handle_missing_values(df_clean, strategy="drop")
     output_missing = df_clean.isnull().sum().sum()
-    print(f"  - Dropped rows with missing values")
+    print("  - Dropped rows with missing values")
     if input_missing > 0 and output_missing == input_missing:
-        warnings.append(f"Circulation: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
+        warnings.append(
+            f"Circulation: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?"
+        )
 
     # Step 4: Standardise dates
     print("\n[4/6] Standardising dates...")
-    df_clean = standardise_dates(df_clean, date_columns=['checkout_date', 'return_date'])
+    df_clean = standardise_dates(
+        df_clean, date_columns=["checkout_date", "return_date"]
+    )
 
     # Step 5: Clean ISBNs (if isbn column exists)
-    if 'isbn' in df_clean.columns:
+    if "isbn" in df_clean.columns:
         print("\n[5/6] Cleaning ISBNs...")
-        original_isbns = df_clean['isbn']
-        df_clean['ISBN_Clean'] = df_clean['isbn'].apply(validate_isbn)
-        invalid_count = df_clean['ISBN_Clean'].isnull().sum()
-        unchanged_count = (df_clean['ISBN_Clean'] == original_isbns).sum()
+        original_isbns = df_clean["isbn"]
+        df_clean["ISBN_Clean"] = df_clean["isbn"].apply(validate_isbn)
+        invalid_count = df_clean["ISBN_Clean"].isnull().sum()
+        unchanged_count = (df_clean["ISBN_Clean"] == original_isbns).sum()
         print(f"  - Found {invalid_count:,} invalid ISBNs")
         if unchanged_count == len(df_clean) and len(df_clean) > 0:
-            warnings.append(f"Circulation: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?")
+            warnings.append(
+                f"Circulation: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?"
+            )
 
     # Step 6: Save cleaned data
     print("\n[6/6] Saving cleaned data...")
-    filepath = save_to_silver(df_clean, 'circulation_clean.csv')
+    filepath = save_to_silver(df_clean, "circulation_clean.csv")
     print(f"  [OK] Saved to: {filepath}")
     print_dataframe_info(df_clean, "Cleaned data")
 
@@ -154,20 +167,22 @@ def process_events_data(warnings):
 
     # Step 1: Load raw data
     print("\n[1/3] Loading raw data...")
-    df = load_json('data/events_data.json')
+    df = load_json("data/events_data.json")
     print_dataframe_info(df, "Raw data")
 
     # Step 2: Handle missing values
     print("\n[2/3] Handling missing values...")
     input_missing = df.isnull().sum().sum()
-    df_clean = handle_missing_values(df, strategy='drop')
+    df_clean = handle_missing_values(df, strategy="drop")
     output_missing = df_clean.isnull().sum().sum()
     if input_missing > 0 and output_missing == input_missing:
-        warnings.append(f"Events: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
+        warnings.append(
+            f"Events: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?"
+        )
 
     # Step 3: Save cleaned data
     print("\n[3/3] Saving cleaned data...")
-    filepath = save_to_silver(df_clean, 'events_clean.csv')
+    filepath = save_to_silver(df_clean, "events_clean.csv")
     print(f"  [OK] Saved to: {filepath}")
 
     print_dataframe_info(df_clean, "Cleaned data")
@@ -190,32 +205,36 @@ def process_catalogue_data(warnings):
 
     # Step 1: Load raw data
     print("\n[1/4] Loading raw data...")
-    df = load_excel('data/catalogue.xlsx')
+    df = load_excel("data/catalogue.xlsx")
     print_dataframe_info(df, "Raw data")
 
     # Step 2: Remove duplicates
     print("\n[2/4] Removing duplicates...")
-    input_dupes = df.duplicated(subset=['ISBN']).sum()
-    df_clean = remove_duplicates(df, subset=['ISBN'])
+    input_dupes = df.duplicated(subset=["ISBN"]).sum()
+    df_clean = remove_duplicates(df, subset=["ISBN"])
     rows_removed = len(df) - len(df_clean)
     print(f"  - Removed {rows_removed:,} duplicate rows")
-    if input_dupes > 0 and df_clean.duplicated(subset=['ISBN']).sum() == input_dupes:
-        warnings.append(f"Catalogue: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
+    if input_dupes > 0 and df_clean.duplicated(subset=["ISBN"]).sum() == input_dupes:
+        warnings.append(
+            f"Catalogue: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?"
+        )
 
     # Step 3: Clean ISBNs (if ISBN column exists)
-    if 'ISBN' in df_clean.columns:
+    if "ISBN" in df_clean.columns:
         print("\n[3/4] Cleaning ISBNs...")
-        original_isbns = df_clean['ISBN']
-        df_clean['ISBN_Clean'] = df_clean['ISBN'].apply(validate_isbn)
-        invalid_count = df_clean['ISBN_Clean'].isnull().sum()
-        unchanged_count = (df_clean['ISBN_Clean'] == original_isbns).sum()
+        original_isbns = df_clean["ISBN"]
+        df_clean["ISBN_Clean"] = df_clean["ISBN"].apply(validate_isbn)
+        invalid_count = df_clean["ISBN_Clean"].isnull().sum()
+        unchanged_count = (df_clean["ISBN_Clean"] == original_isbns).sum()
         print(f"  - Found {invalid_count:,} invalid ISBNs")
         if unchanged_count == len(df_clean) and len(df_clean) > 0:
-            warnings.append(f"Catalogue: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?")
+            warnings.append(
+                f"Catalogue: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?"
+            )
 
     # Step 4: Save cleaned data
     print("\n[4/4] Saving cleaned data...")
-    filepath = save_to_silver(df_clean, 'catalogue_clean.csv')
+    filepath = save_to_silver(df_clean, "catalogue_clean.csv")
     print(f"  [OK] Saved to: {filepath}")
 
     print_dataframe_info(df_clean, "Cleaned data")
@@ -240,11 +259,11 @@ def process_feedback_data():
     print("\n[1/2] Loading and parsing feedback text...")
 
     # Read the text file
-    with open('data/feedback.txt', 'r', encoding='utf-8') as f:
+    with open("data/feedback.txt", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Count the feedbacks
-    feedback_count = content.count('Feedback #')
+    feedback_count = content.count("Feedback #")
     print(f"  - Found {feedback_count} feedback entries")
 
     # Capture both branch name and rating number
@@ -257,7 +276,9 @@ def process_feedback_data():
 
     # Group by SBranch and Rating
     df_summary = (
-        df.groupby(["branch", "rating"], as_index=False).size().rename(columns={"size": "count"})
+        df.groupby(["branch", "rating"], as_index=False)
+        .size()
+        .rename(columns={"size": "count"})
     )
 
     # Step 2: Save
@@ -273,6 +294,7 @@ def process_feedback_data():
 # ============================================
 # MAIN PIPELINE
 # ============================================
+
 
 def run_pipeline():
     """
@@ -294,10 +316,10 @@ def run_pipeline():
 
     try:
         # Process each data source
-        results['circulation'] = process_circulation_data(warnings)
-        results['events'] = process_events_data(warnings)
-        results['catalogue'] = process_catalogue_data(warnings)
-        results['feedback'] = process_feedback_data()
+        results["circulation"] = process_circulation_data(warnings)
+        results["events"] = process_events_data(warnings)
+        results["catalogue"] = process_catalogue_data(warnings)
+        results["feedback"] = process_feedback_data()
 
         # Calculate pipeline statistics
         end_time = datetime.now()

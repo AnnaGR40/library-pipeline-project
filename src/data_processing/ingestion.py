@@ -51,6 +51,7 @@ def load_csv(filepath, **kwargs):
         logger.error(f"Error loading CSV {filepath}: {e}")
         raise
 
+
 def load_json(filepath):
     """Load JSON file and flatten nested structure into a DataFrame.
 
@@ -75,7 +76,7 @@ def load_json(filepath):
 
     try:
         logger.info(f"Loading JSON from {filepath}")
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
 
         df = pd.json_normalize(data)
